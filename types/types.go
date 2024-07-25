@@ -1,11 +1,5 @@
 package types
 
-type Secret struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int64  `json:"expires_in"`
-}
-
 type AuthRequest struct {
 	ResponseType string `json:"response_type"`
 	ClientID     string `json:"client_id"`
@@ -26,7 +20,7 @@ type ClientResponse struct {
 	ExpiresIn   int64  `json:"expires_in"`
 }
 
-type CallbackResponse struct {
+type AuthResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	TokenType    string `json:"token_type"`

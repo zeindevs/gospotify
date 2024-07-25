@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/zeindevs/gospotify/config"
+	"github.com/zeindevs/gospotify/types"
 	"github.com/zeindevs/gospotify/util"
 )
 
@@ -61,7 +62,7 @@ func (as *AuthService) ClientLogin() (any, error) {
 	return val, err
 }
 
-func (as *AuthService) Callback(code string, state string) (any, error) {
+func (as *AuthService) Callback(code string, state string) (*types.AuthResponse, error) {
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", code)
@@ -77,8 +78,30 @@ func (as *AuthService) Callback(code string, state string) (any, error) {
 		return nil, err
 	}
 
-	var val any
+	var val types.AuthResponse
 	json.Unmarshal(res, &val)
 
-	return val, err
+	return &val, err
+}
+
+func (as *AuthService) RefreshToken(token string) (*types.AuthResponse, error) {
+
+	data := url.Values{}
+	data.Set("grant_type", "refresh_token")
+	data.Set("refresh_token", token)
+	data.Set("client_id", as.cfg.CLIENT_ID)
+
+	res, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := os.WriteFile("secret.json", res, 06444); err != nil {
+		return nil, err
+	}
+
+	var val types.AuthResponse
+	json.Unmarshal(res, &val)
+
+	return &val, nil
 }

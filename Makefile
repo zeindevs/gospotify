@@ -6,3 +6,6 @@ build:
 
 secret:
 	go run cmd/secret/main.go
+
+tailwind:
+	tailwindcss -i style.css -o public/css/style.css -m -w

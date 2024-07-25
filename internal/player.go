@@ -31,3 +31,13 @@ func (ps *PlayerService) GetCurrentPlaying(secret string) (any, error) {
 
 	return val, nil
 }
+
+// TODO: https://api.spotify.com/v1/me/player/next
+func (ps *PlayerService) Next(secret string) (any, error) {
+	return nil, nil
+}
+
+// TODO: https://api.spotify.com/v1/me/player/previous
+func (ps *PlayerService) Prev(secret string) (any, error) {
+	return nil, nil
+}
