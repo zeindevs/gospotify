@@ -25,4 +25,5 @@ go.work.sum
 .env
 
 client.json
+secret.json
 

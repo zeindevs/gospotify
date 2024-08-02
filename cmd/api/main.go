@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -9,13 +10,13 @@ import (
 	"github.com/zeindevs/gospotify/config"
 	"github.com/zeindevs/gospotify/handler"
 	"github.com/zeindevs/gospotify/internal"
+	"github.com/zeindevs/gospotify/util"
 )
 
 func intercept404(handler, on404 http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hookedWriter := &hookedResponseWriter{ResponseWriter: w}
 		handler.ServeHTTP(hookedWriter, r)
-
 		if hookedWriter.got404 {
 			on404.ServeHTTP(w, r)
 		}
@@ -39,7 +40,6 @@ func (hrw *hookedResponseWriter) Write(p []byte) (int, error) {
 	if hrw.got404 {
 		return len(p), nil
 	}
-
 	return hrw.ResponseWriter.Write(p)
 }
 
@@ -82,16 +82,16 @@ func main() {
 	// serverIndex := serveFileContents("index.html", httpFS)
 
 	// s.Handle("GET /", intercept404(fileServer, serverIndex))
-	s.Handle("GET /", fileServer)
-	s.HandleFunc("GET /login", handler.HandleLogin)
-	s.HandleFunc("GET /refresh", handler.HandleRefresh)
-	s.HandleFunc("GET /login/client", handler.HandleClientLogin)
-	s.HandleFunc("GET /logout", handler.HandleLogout)
-	s.HandleFunc("GET /callback", handler.HandleCallback)
-	s.HandleFunc("GET /api/playing", handler.HandlePlaying)
+	s.Handle("GET /", internal.LoggerAsset(fileServer))
+	s.Handle("GET /login", internal.Logger(handler.HandleLogin))
+	s.Handle("GET /refresh", internal.Logger(handler.HandleRefresh))
+	s.Handle("GET /login/client", internal.Logger(handler.HandleClientLogin))
+	s.Handle("GET /logout", internal.Logger(handler.HandleLogout))
+	s.Handle("GET /callback", internal.Logger(handler.HandleCallback))
+	s.Handle("GET /api/playing", internal.Logger(handler.HandlePlaying))
+	s.Handle("POST /api/playing/next", internal.Logger(handler.HandlePlayNext))
+	s.Handle("POST /api/playing/prev", internal.Logger(handler.HandlePlayPrev))
 
-	fmt.Println("Server up and listening on http://localhost:9001")
-	if err := http.ListenAndServe(":9001", s); err != nil {
-		panic(err)
-	}
+	log.Println("Server up and listening on http://localhost:9001")
+	util.ErrorPanic(http.ListenAndServe(":9001", s))
 }

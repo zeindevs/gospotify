@@ -33,7 +33,6 @@ func (c *Http) Get(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return body, nil
 }
 
@@ -53,6 +52,5 @@ func (c *Http) Post(url string, data io.Reader) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return body, nil
 }
