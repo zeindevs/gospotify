@@ -1,20 +1,16 @@
 package handler
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/zeindevs/gospotify/types"
 )
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	url, err := h.Auth.Login(h.cfg.CLIENT_ID)
+	url, err := h.AuthService.Login(h.cfg.CLIENT_ID)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"err": err.Error()})
+		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
 		return
 	}
 
@@ -22,34 +18,27 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleClientLogin(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-
-	res, err := h.Auth.ClientLogin()
+	res, err := h.AuthService.ClientLogin()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"err": err.Error()})
+		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]any{"data": res})
+	WriteJSON(w, http.StatusOK, map[string]any{"data": res})
 }
 
 func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-
 	var code = r.URL.Query().Get("code")
 	var state = r.URL.Query().Get("state")
 
 	if state == "" {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"err": "state required"})
+		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": "state required"})
 		return
 	}
 
-	res, err := h.Auth.Callback(code, state)
+	res, err := h.AuthService.Callback(code, state)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"err": err.Error()})
+		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
 		return
 	}
 
@@ -70,26 +59,17 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	var secret types.AuthResponse
-
 	token, err := r.Cookie("RefreshToken")
 	if err != nil {
-		log.Println("with secret.json")
-		file, err := os.ReadFile("secret.json")
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"err": err.Error()})
-			return
-		}
-		json.Unmarshal(file, &secret)
+		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
+		return
 	} else {
-		log.Println("with cookies")
 		secret.RefreshToken = token.Value
 	}
 
-	res, err := h.Auth.RefreshToken(secret.RefreshToken)
+	res, err := h.AuthService.RefreshToken(secret.RefreshToken)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"err": err.Error()})
+		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
 		return
 	}
 

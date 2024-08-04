@@ -1,26 +1,26 @@
-package internal
+package service
 
 import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"os"
 	"strings"
 
-	"github.com/zeindevs/gospotify/config"
+	"github.com/zeindevs/gospotify/internal/config"
+	"github.com/zeindevs/gospotify/internal/pkg"
+	"github.com/zeindevs/gospotify/internal/util"
 	"github.com/zeindevs/gospotify/types"
-	"github.com/zeindevs/gospotify/util"
 )
 
 type AuthService struct {
-	http *Http
+	http *pkg.Http
 	cfg  *config.Config
 }
 
 func NewAuthService(cfg *config.Config) *AuthService {
 	return &AuthService{
-		http: NewHttp(),
+		http: pkg.NewHttp(),
 		cfg:  cfg,
 	}
 }
@@ -34,7 +34,7 @@ func (as *AuthService) Login(clientID string) (string, error) {
 	data := url.Values{}
 	data.Set("response_type", "code")
 	data.Set("client_id", clientID)
-	data.Set("scope", "user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing")
+	data.Set("scope", "user-read-private user-read-email user-read-playback-state user-modify-playback-state user-read-currently-playing user-library-modify user-library-read")
 	data.Set("redirect_uri", "http://localhost:9001/callback")
 	data.Set("state", state)
 
@@ -55,9 +55,9 @@ func (as *AuthService) ClientLogin() (any, error) {
 	var val any
 	json.Unmarshal(res, &val)
 
-	if err := os.WriteFile("client.json", res, 06444); err != nil {
-		return nil, err
-	}
+	// if err := os.WriteFile("client.json", res, 06444); err != nil {
+	// 	return nil, err
+	// }
 
 	return val, err
 }
@@ -74,9 +74,9 @@ func (as *AuthService) Callback(code string, state string) (*types.AuthResponse,
 	as.http.Header.Add("Authorization", "Basic "+token)
 	res, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 
-	if err := os.WriteFile("secret.json", res, 06444); err != nil {
-		return nil, err
-	}
+	// if err := os.WriteFile("secret.json", res, 06444); err != nil {
+	// 	return nil, err
+	// }
 
 	var val types.AuthResponse
 	json.Unmarshal(res, &val)
@@ -85,7 +85,6 @@ func (as *AuthService) Callback(code string, state string) (*types.AuthResponse,
 }
 
 func (as *AuthService) RefreshToken(token string) (*types.AuthResponse, error) {
-
 	data := url.Values{}
 	data.Set("grant_type", "refresh_token")
 	data.Set("refresh_token", token)
@@ -96,9 +95,9 @@ func (as *AuthService) RefreshToken(token string) (*types.AuthResponse, error) {
 		return nil, err
 	}
 
-	if err := os.WriteFile("secret.json", res, 06444); err != nil {
-		return nil, err
-	}
+	// if err := os.WriteFile("secret.json", res, 06444); err != nil {
+	// 	return nil, err
+	// }
 
 	var val types.AuthResponse
 	json.Unmarshal(res, &val)
