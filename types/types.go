@@ -27,3 +27,34 @@ type AuthResponse struct {
 	Scope        string `json:"scope"`
 	ExpiresIn    int64  `json:"expires_in"`
 }
+
+type CurrentPlayingResponse struct {
+	Item struct {
+		ID    string `json:"id"`
+		Name  string `json:"name"`
+		Album struct {
+			ID     string `json:"id"`
+			Name   string `json:"name"`
+			Images []struct {
+				Url    string `json:"url"`
+				Width  int    `json:"width"`
+				Height int    `json:"height"`
+			} `json:"images"`
+		} `json:"album"`
+		Artists []struct {
+			ID   string `json:"id"`
+			Href string `json:"href"`
+			Name string `json:"name"`
+			Type string `json:"type"`
+			Uri  string `json:"uri"`
+		} `json:"artists"`
+		ExternalUrls struct {
+			Spotify string `json:"spotify"`
+		} `json:"external_urls"`
+		DurationMs int `json:"duration_ms"`
+	} `json:"item"`
+}
+
+type SaveRequest struct {
+	IDs []string `json:"ids"`
+}

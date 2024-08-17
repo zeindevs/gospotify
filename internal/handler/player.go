@@ -3,32 +3,42 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/zeindevs/gospotify/types"
 )
 
 func (h *Handler) HandlePlaying(w http.ResponseWriter, r *http.Request) {
-	secret, err := GetAuth(r)
+	auth, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
 	}
 
-	data, err := h.PlayerService.GetCurrentPlaying(secret.AccessToken, "ID")
+	data, err := h.PlayerService.GetCurrentPlaying(auth.AccessToken, "ID")
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
 	}
 
-	WriteJSON(w, http.StatusOK, map[string]any{"data": data})
+	res, err := h.PlayerService.IsSaved(auth.AccessToken, data.Item.ID)
+	isSaved := false
+	for _, sv := range res {
+		if sv {
+			isSaved = true
+		}
+	}
+
+	WriteJSON(w, http.StatusOK, map[string]any{"data": data, "is_saved": isSaved})
 }
 
 func (h *Handler) HandlePlayPrev(w http.ResponseWriter, r *http.Request) {
-	secret, err := GetAuth(r)
+	auth, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
 	}
 
-	res, err := h.PlayerService.Prev(secret.AccessToken)
+	res, err := h.PlayerService.Prev(auth.AccessToken)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
@@ -38,13 +48,13 @@ func (h *Handler) HandlePlayPrev(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlePlayNext(w http.ResponseWriter, r *http.Request) {
-	secret, err := GetAuth(r)
+	auth, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
 	}
 
-	res, err := h.PlayerService.Next(secret.AccessToken)
+	res, err := h.PlayerService.Next(auth.AccessToken)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
@@ -54,20 +64,24 @@ func (h *Handler) HandlePlayNext(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleSave(w http.ResponseWriter, r *http.Request) {
-	_, err := GetAuth(r)
+	auth, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
 	}
 
-	type likeRequest struct {
-		IDs string `json:"ids"`
-	}
-	var req likeRequest
+	var req types.SaveRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
 	}
 
-	WriteJSON(w, http.StatusInternalServerError, map[string]any{"data": nil})
+	// res, err := h.PlayerService.IsSaved(auth.AccessToken, req.IDs)
+	res, err := h.PlayerService.Save(auth.AccessToken, req)
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
+		return
+	}
+
+	WriteJSON(w, http.StatusOK, map[string]any{"data": res})
 }

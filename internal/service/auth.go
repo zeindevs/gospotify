@@ -53,7 +53,9 @@ func (as *AuthService) ClientLogin() (any, error) {
 	res, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 
 	var val any
-	json.Unmarshal(res, &val)
+	if err := json.Unmarshal(res, &val); err != nil {
+		return nil, err
+	}
 
 	// if err := os.WriteFile("client.json", res, 0644); err != nil {
 	// 	return nil, err
@@ -79,7 +81,9 @@ func (as *AuthService) Callback(code string, state string) (*types.AuthResponse,
 	// }
 
 	var val types.AuthResponse
-	json.Unmarshal(res, &val)
+	if err := json.Unmarshal(res, &val); err != nil {
+		return nil, err
+	}
 
 	return &val, err
 }
@@ -100,7 +104,9 @@ func (as *AuthService) RefreshToken(token string) (*types.AuthResponse, error) {
 	// }
 
 	var val types.AuthResponse
-	json.Unmarshal(res, &val)
+	if err := json.Unmarshal(res, &val); err != nil {
+		return nil, err
+	}
 
 	return &val, nil
 }

@@ -58,7 +58,7 @@
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ids: ids }),
+      body: JSON.stringify({ ids: [ids] }),
     })
       .then((res) => res.json())
       .then((res) => {
@@ -72,7 +72,7 @@
     return `${min > 10 ? min : "0" + min}:${sec > 10 ? sec : "0" + sec}`;
   }
 
-  function renderPlaying(data) {
+  function renderPlaying(data, is_saved) {
     content.innerHTML = `
       <div class="flex items-center justify-between">
         <p class="text-sm">Now playing...</p>
@@ -91,7 +91,7 @@
         </div>
         <div class="">
           <button id="saved">
-            ${loveIcon(data?.liked)}
+            ${loveIcon(is_saved)}
           </button>
         </div>
       </div>
@@ -124,7 +124,8 @@
     saved.addEventListener("click", () => {
       save(data.item.id).then((res) => {
         console.log("save track:", res);
-        if (!res.data) {
+        if (res.data?.error) {
+          alert(res.data?.error?.message);
         } else {
           getPlaying();
         }
@@ -178,7 +179,7 @@
       .then((res) => {
         console.log("current playing:", res);
         if (res.data) {
-          renderPlaying(res.data);
+          renderPlaying(res.data, res.is_saved);
         } else {
           content.innerHTML = `
              <div
