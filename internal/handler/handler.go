@@ -6,6 +6,7 @@ import (
 
 	"github.com/zeindevs/gospotify/internal/config"
 	"github.com/zeindevs/gospotify/internal/service"
+	"github.com/zeindevs/gospotify/types"
 )
 
 type Handler struct {
@@ -32,4 +33,19 @@ func WriteJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
+}
+
+func GetAuth(r *http.Request) (*types.AuthResponse, error) {
+	var auth types.AuthResponse
+	accessToken, err := r.Cookie("AccessToken")
+	if err != nil {
+		return nil, err
+	}
+	auth.AccessToken = accessToken.Value
+	refreshToken, err := r.Cookie("RefreshToken")
+	if err != nil {
+		return nil, err
+	}
+	auth.RefreshToken = refreshToken.Value
+	return &auth, nil
 }

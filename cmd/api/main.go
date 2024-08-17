@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +21,7 @@ func main() {
 		PlayerService: service.NewPlayerService(cfg),
 	})
 
-	s := &http.ServeMux{}
+	s := http.NewServeMux()
 	httpFS := http.FS(os.DirFS("public"))
 	fileServer := http.FileServer(httpFS)
 
@@ -35,6 +36,6 @@ func main() {
 	s.Handle("POST /api/playing/prev", middleware.Logger(handler.HandlePlayPrev))
 	s.Handle("POST /api/track/save", middleware.Logger(handler.HandleSave))
 
-	log.Println("Server up and listening on http://localhost:9001")
-	util.ErrorPanic(http.ListenAndServe(":9001", s))
+	log.Printf("Server up and listening on http://localhost:%d\n", cfg.PORT)
+	util.ErrorPanic(http.ListenAndServe(fmt.Sprintf(":%d", cfg.PORT), s))
 }

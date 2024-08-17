@@ -3,8 +3,6 @@ package handler
 import (
 	"net/http"
 	"time"
-
-	"github.com/zeindevs/gospotify/types"
 )
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -58,16 +56,12 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
-	var secret types.AuthResponse
-	token, err := r.Cookie("RefreshToken")
+	auth, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
-		return
-	} else {
-		secret.RefreshToken = token.Value
 	}
 
-	res, err := h.AuthService.RefreshToken(secret.RefreshToken)
+	res, err := h.AuthService.RefreshToken(auth.RefreshToken)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
 		return

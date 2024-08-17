@@ -3,18 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-
-	"github.com/zeindevs/gospotify/types"
 )
 
 func (h *Handler) HandlePlaying(w http.ResponseWriter, r *http.Request) {
-	var secret types.AuthResponse
-	token, err := r.Cookie("AccessToken")
+	secret, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
-	} else {
-		secret.AccessToken = token.Value
 	}
 
 	data, err := h.PlayerService.GetCurrentPlaying(secret.AccessToken, "ID")
@@ -27,14 +22,10 @@ func (h *Handler) HandlePlaying(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlePlayPrev(w http.ResponseWriter, r *http.Request) {
-	var secret types.AuthResponse
-	token, err := r.Cookie("AccessToken")
+	secret, err := GetAuth(r)
 	if err != nil {
-
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
-	} else {
-		secret.AccessToken = token.Value
 	}
 
 	res, err := h.PlayerService.Prev(secret.AccessToken)
@@ -47,13 +38,10 @@ func (h *Handler) HandlePlayPrev(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandlePlayNext(w http.ResponseWriter, r *http.Request) {
-	var secret types.AuthResponse
-	token, err := r.Cookie("AccessToken")
+	secret, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
-	} else {
-		secret.AccessToken = token.Value
 	}
 
 	res, err := h.PlayerService.Next(secret.AccessToken)
@@ -66,13 +54,10 @@ func (h *Handler) HandlePlayNext(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleSave(w http.ResponseWriter, r *http.Request) {
-	var secret types.AuthResponse
-	token, err := r.Cookie("AccessToken")
+	_, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
-	} else {
-		secret.AccessToken = token.Value
 	}
 
 	type likeRequest struct {

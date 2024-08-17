@@ -1,4 +1,6 @@
-run: build
+all: build run
+
+run:
 	./bin/main.exe
 
 build:
@@ -8,4 +10,4 @@ secret:
 	go run cmd/secret/main.go
 
 tailwind:
-	tailwindcss -i style.css -o public/css/style.css -m -w
+	tailwindcss -i style.css -o public/css/style.css --config tailwind.config.js --minify --watch
