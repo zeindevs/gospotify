@@ -56,5 +56,6 @@ type CurrentPlayingResponse struct {
 }
 
 type SaveRequest struct {
-	IDs []string `json:"ids"`
+	IDs     []string `json:"ids"`
+	IsSaved bool     `json:"is_saved"`
 }

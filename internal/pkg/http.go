@@ -75,3 +75,22 @@ func (c *Http) Put(url string, data io.Reader) ([]byte, error) {
 	}
 	return body, nil
 }
+
+func (c *Http) Delete(url string, data io.Reader) ([]byte, error) {
+	req, err := http.NewRequest("DELETE", url, data)
+	req.Header = c.Header
+	if err != nil {
+		return nil, err
+	}
+	res, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}

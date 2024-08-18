@@ -30,7 +30,9 @@ func (ps *PlayerService) GetCurrentPlaying(secret, marketID string) (*types.Curr
 	}
 
 	var val types.CurrentPlayingResponse
-	json.NewDecoder(bytes.NewBuffer(res)).Decode(&val)
+	if err := json.NewDecoder(bytes.NewBuffer(res)).Decode(&val); err != nil {
+		return nil, err
+	}
 
 	return &val, nil
 }
@@ -68,21 +70,16 @@ func (ps *PlayerService) Next(secret string) (any, error) {
 func (ps *PlayerService) Save(secret string, ids types.SaveRequest) (any, error) {
 	ps.http.Header.Add("Authorization", "Bearer "+secret)
 	ps.http.Header.Add("Content-Type", "application/json")
-	data, err := json.Marshal(ids)
+	data, err := json.Marshal(map[string][]string{"ids": ids.IDs})
 	if err != nil {
 		return nil, err
 	}
-	res, err := ps.http.Put("https://api.spotify.com/v1/me/tracks", bytes.NewBuffer(data))
+	_, err = ps.http.Put("https://api.spotify.com/v1/me/tracks", bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
 
-	var val any
-	if err := json.Unmarshal(res, &val); err != nil {
-		return nil, err
-	}
-
-	return val, nil
+	return "saved", nil
 }
 
 func (ps *PlayerService) IsSaved(secret, ids string) ([]bool, error) {
@@ -98,4 +95,20 @@ func (ps *PlayerService) IsSaved(secret, ids string) ([]bool, error) {
 	}
 
 	return val, nil
+}
+
+// TODO: DELETE https://api.spotify.com/v1/me/tracks --data '{"ids": []}'
+func (ps *PlayerService) DeleteSaved(secret string, ids types.SaveRequest) (any, error) {
+	ps.http.Header.Add("Authorization", "Bearer "+secret)
+	ps.http.Header.Add("Content-Type", "application/json")
+	data, err := json.Marshal(map[string][]string{"ids": ids.IDs})
+	if err != nil {
+		return nil, err
+	}
+	_, err = ps.http.Delete("https://api.spotify.com/v1/me/tracks", bytes.NewBuffer(data))
+	if err != nil {
+		return nil, err
+	}
+
+	return "unsaved", nil
 }

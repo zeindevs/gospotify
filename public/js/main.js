@@ -52,13 +52,13 @@
       });
   }
 
-  async function save(ids) {
+  async function save(ids, is_saved) {
     return fetch("/api/track/save", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ids: [ids] }),
+      body: JSON.stringify({ ids: [ids], is_saved }),
     })
       .then((res) => res.json())
       .then((res) => {
@@ -122,7 +122,7 @@
     });
 
     saved.addEventListener("click", () => {
-      save(data.item.id).then((res) => {
+      save(data.item.id, is_saved).then((res) => {
         console.log("save track:", res);
         if (res.data?.error) {
           alert(res.data?.error?.message);

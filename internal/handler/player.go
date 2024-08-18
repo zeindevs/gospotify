@@ -64,6 +64,7 @@ func (h *Handler) HandlePlayNext(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleSave(w http.ResponseWriter, r *http.Request) {
+	var err error
 	auth, err := GetAuth(r)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
@@ -76,8 +77,12 @@ func (h *Handler) HandleSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// res, err := h.PlayerService.IsSaved(auth.AccessToken, req.IDs)
-	res, err := h.PlayerService.Save(auth.AccessToken, req)
+	var res any
+	if !req.IsSaved {
+		res, err = h.PlayerService.Save(auth.AccessToken, req)
+	} else {
+		res, err = h.PlayerService.DeleteSaved(auth.AccessToken, req)
+	}
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, map[string]string{"err": err.Error()})
 		return
