@@ -3,12 +3,17 @@ package handler
 import (
 	"net/http"
 	"time"
+
+	"github.com/zeindevs/gospotify/types"
 )
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	url, err := h.AuthService.Login(h.cfg.CLIENT_ID)
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
+		WriteJSON(w, http.StatusUnauthorized, types.ApiResponse{
+			Status: http.StatusUnauthorized,
+			Error:  err.Error(),
+		})
 		return
 	}
 
@@ -18,11 +23,17 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleClientLogin(w http.ResponseWriter, r *http.Request) {
 	res, err := h.AuthService.ClientLogin()
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
+		WriteJSON(w, res.Status, types.ApiResponse{
+			Status: res.Status,
+			Error:  err.Error(),
+		})
 		return
 	}
 
-	WriteJSON(w, http.StatusOK, map[string]any{"data": res})
+	WriteJSON(w, res.Status, types.ApiResponse{
+		Status: res.Status,
+		Data:   res,
+	})
 }
 
 func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
@@ -30,13 +41,19 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	var state = r.URL.Query().Get("state")
 
 	if state == "" {
-		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": "state required"})
+		WriteJSON(w, http.StatusBadRequest, types.ApiResponse{
+			Status: http.StatusBadRequest,
+			Error:  "state required",
+		})
 		return
 	}
 
 	res, err := h.AuthService.Callback(code, state)
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
+		WriteJSON(w, res.Status, types.ApiResponse{
+			Status: res.Status,
+			Error:  err.Error(),
+		})
 		return
 	}
 
@@ -58,12 +75,18 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	auth, err := GetAuth(r)
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
+		WriteJSON(w, http.StatusUnauthorized, types.ApiResponse{
+			Status: http.StatusUnauthorized,
+			Error:  err.Error(),
+		})
 	}
 
 	res, err := h.AuthService.RefreshToken(auth.RefreshToken)
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, map[string]any{"err": err.Error()})
+		WriteJSON(w, res.Status, types.ApiResponse{
+			Status: res.Status,
+			Error:  err.Error(),
+		})
 		return
 	}
 

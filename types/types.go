@@ -1,5 +1,11 @@
 package types
 
+type ApiResponse struct {
+	Status int `json:"status"`
+	Data   any `json:"data"`
+	Error  any `json:"error,omitempty"`
+}
+
 type AuthRequest struct {
 	ResponseType string `json:"response_type"`
 	ClientID     string `json:"client_id"`
@@ -12,12 +18,14 @@ type AuthTokenRequest struct {
 	GrantType   string `json:"grant_type"`
 	Code        string `json:"code"`
 	RedirectUri string `json:"redirect_uri"`
+	Status      int    `json:"status,omitempty"`
 }
 
 type ClientResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int64  `json:"expires_in"`
+	Status      int    `json:"status,omitempty"`
 }
 
 type AuthResponse struct {
@@ -26,6 +34,7 @@ type AuthResponse struct {
 	TokenType    string `json:"token_type"`
 	Scope        string `json:"scope"`
 	ExpiresIn    int64  `json:"expires_in"`
+	Status       int    `json:"status,omitempty"`
 }
 
 type CurrentPlayingResponse struct {
@@ -53,6 +62,7 @@ type CurrentPlayingResponse struct {
 		} `json:"external_urls"`
 		DurationMs int `json:"duration_ms"`
 	} `json:"item"`
+	IsSaved bool `json:"is_saved"`
 }
 
 type SaveRequest struct {

@@ -43,25 +43,27 @@ func (as *AuthService) Login(clientID string) (string, error) {
 	return url, nil
 }
 
-func (as *AuthService) ClientLogin() (any, error) {
+func (as *AuthService) ClientLogin() (*types.ClientResponse, error) {
 	data := url.Values{}
 	data.Set("grant_type", "client_credentials")
 	data.Set("client_id", as.cfg.CLIENT_ID)
 	data.Set("client_secret", as.cfg.CLIENT_SECRET)
 
 	as.http.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	res, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
-
-	var val any
-	if err := json.Unmarshal(res, &val); err != nil {
-		return nil, err
-	}
+	res, status, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 
 	// if err := os.WriteFile("client.json", res, 0644); err != nil {
 	// 	return nil, err
 	// }
 
-	return val, err
+	var val types.ClientResponse
+	if err := json.Unmarshal(res, &val); err != nil {
+		return nil, err
+	}
+
+	val.Status = status
+
+	return &val, err
 }
 
 func (as *AuthService) Callback(code string, state string) (*types.AuthResponse, error) {
@@ -74,7 +76,7 @@ func (as *AuthService) Callback(code string, state string) (*types.AuthResponse,
 
 	as.http.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	as.http.Header.Add("Authorization", "Basic "+token)
-	res, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
+	res, status, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 
 	// if err := os.WriteFile("secret.json", res, 0644); err != nil {
 	// 	return nil, err
@@ -85,6 +87,8 @@ func (as *AuthService) Callback(code string, state string) (*types.AuthResponse,
 		return nil, err
 	}
 
+	val.Status = status
+
 	return &val, err
 }
 
@@ -94,7 +98,7 @@ func (as *AuthService) RefreshToken(token string) (*types.AuthResponse, error) {
 	data.Set("refresh_token", token)
 	data.Set("client_id", as.cfg.CLIENT_ID)
 
-	res, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
+	res, status, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, err
 	}
@@ -107,6 +111,8 @@ func (as *AuthService) RefreshToken(token string) (*types.AuthResponse, error) {
 	if err := json.Unmarshal(res, &val); err != nil {
 		return nil, err
 	}
+
+	val.Status = status
 
 	return &val, nil
 }

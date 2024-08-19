@@ -24,13 +24,13 @@ func NewPlayerService(cfg *config.Config) *PlayerService {
 
 func (ps *PlayerService) GetCurrentPlaying(secret, marketID string) (*types.CurrentPlayingResponse, error) {
 	ps.http.Header.Add("Authorization", "Bearer "+secret)
-	res, err := ps.http.Get(fmt.Sprintf("https://api.spotify.com/v1/me/player/currently-playing?market=%s", marketID))
+	res, _, err := ps.http.Get(fmt.Sprintf("https://api.spotify.com/v1/me/player/currently-playing?market=%s", marketID))
 	if err != nil {
 		return nil, err
 	}
 
 	var val types.CurrentPlayingResponse
-	if err := json.NewDecoder(bytes.NewBuffer(res)).Decode(&val); err != nil {
+	if err := json.Unmarshal(res, &val); err != nil {
 		return nil, err
 	}
 
@@ -39,7 +39,7 @@ func (ps *PlayerService) GetCurrentPlaying(secret, marketID string) (*types.Curr
 
 func (ps *PlayerService) Prev(secret string) (any, error) {
 	ps.http.Header.Add("Authorization", "Bearer "+secret)
-	res, err := ps.http.Post("https://api.spotify.com/v1/me/player/previous", nil)
+	res, _, err := ps.http.Post("https://api.spotify.com/v1/me/player/previous", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (ps *PlayerService) Prev(secret string) (any, error) {
 
 func (ps *PlayerService) Next(secret string) (any, error) {
 	ps.http.Header.Add("Authorization", "Bearer "+secret)
-	res, err := ps.http.Post("https://api.spotify.com/v1/me/player/next", nil)
+	res, _, err := ps.http.Post("https://api.spotify.com/v1/me/player/next", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (ps *PlayerService) Save(secret string, ids types.SaveRequest) (any, error)
 	if err != nil {
 		return nil, err
 	}
-	_, err = ps.http.Put("https://api.spotify.com/v1/me/tracks", bytes.NewBuffer(data))
+	_, _, err = ps.http.Put("https://api.spotify.com/v1/me/tracks", bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (ps *PlayerService) Save(secret string, ids types.SaveRequest) (any, error)
 
 func (ps *PlayerService) IsSaved(secret, ids string) ([]bool, error) {
 	ps.http.Header.Add("Authorization", "Bearer "+secret)
-	res, err := ps.http.Get(fmt.Sprintf("https://api.spotify.com/v1/me/tracks/contains?ids=%s", ids))
+	res, _, err := ps.http.Get(fmt.Sprintf("https://api.spotify.com/v1/me/tracks/contains?ids=%s", ids))
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (ps *PlayerService) DeleteSaved(secret string, ids types.SaveRequest) (any,
 	if err != nil {
 		return nil, err
 	}
-	_, err = ps.http.Delete("https://api.spotify.com/v1/me/tracks", bytes.NewBuffer(data))
+	_, _, err = ps.http.Delete("https://api.spotify.com/v1/me/tracks", bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}

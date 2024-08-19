@@ -9,11 +9,13 @@ import (
 )
 
 var (
-	port = 5001
+	port   = 5001
+	market = "ID"
 )
 
 type Config struct {
 	PORT          int
+	MARKET        string
 	CLIENT_ID     string
 	CLIENT_SECRET string
 }
@@ -28,6 +30,7 @@ func NewConfig() *Config {
 
 	return &Config{
 		PORT:          port,
+		MARKET:        market,
 		CLIENT_ID:     os.Getenv("CLIENT_ID"),
 		CLIENT_SECRET: os.Getenv("CLIENT_SECRET"),
 	}

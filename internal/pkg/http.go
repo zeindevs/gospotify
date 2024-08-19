@@ -19,78 +19,49 @@ func NewHttp() *Http {
 	}
 }
 
-func (c *Http) Get(url string) ([]byte, error) {
+func (c *Http) Get(url string) ([]byte, int, error) {
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header = c.Header
 	if err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError, err
 	}
-	res, err := c.http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
+	return c.sendRequest(req)
 }
 
-func (c *Http) Post(url string, data io.Reader) ([]byte, error) {
+func (c *Http) Post(url string, data io.Reader) ([]byte, int, error) {
 	req, err := http.NewRequest("POST", url, data)
-	req.Header = c.Header
 	if err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError, err
 	}
-	res, err := c.http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
+	return c.sendRequest(req)
 }
 
-func (c *Http) Put(url string, data io.Reader) ([]byte, error) {
+func (c *Http) Put(url string, data io.Reader) ([]byte, int, error) {
 	req, err := http.NewRequest("PUT", url, data)
-	req.Header = c.Header
 	if err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError, err
 	}
-	res, err := c.http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
+	return c.sendRequest(req)
 }
 
-func (c *Http) Delete(url string, data io.Reader) ([]byte, error) {
+func (c *Http) Delete(url string, data io.Reader) ([]byte, int, error) {
 	req, err := http.NewRequest("DELETE", url, data)
 	req.Header = c.Header
 	if err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError, err
 	}
+	return c.sendRequest(req)
+}
+
+func (c *Http) sendRequest(req *http.Request) ([]byte, int, error) {
 	res, err := c.http.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, res.StatusCode, err
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return nil, res.StatusCode, err
 	}
-	return body, nil
+	return body, res.StatusCode, nil
 }
