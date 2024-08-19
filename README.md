@@ -9,9 +9,9 @@
 - Current Play
 - Play Prev Track
 - Play Next Track
-- Save Track (todo)
+- Save Track
 - Playlist (todo)
-- etc..
+- more... (upcoming)
 
 ## License
 
