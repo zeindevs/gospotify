@@ -22,7 +22,7 @@ func main() {
 	})
 
 	s := http.NewServeMux()
-	httpFS := http.FS(os.DirFS("public"))
+	httpFS := http.FS(os.DirFS("public/static"))
 	fileServer := http.FileServer(httpFS)
 
 	s.Handle("GET /", middleware.LoggerAsset(fileServer))

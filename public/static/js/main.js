@@ -72,7 +72,7 @@
     return `${min > 10 ? min : "0" + min}:${sec > 10 ? sec : "0" + sec}`;
   }
 
-  function renderPlaying(data, is_saved) {
+  function renderPlaying(data) {
     content.innerHTML = `
       <div class="flex items-center justify-between">
         <p class="text-sm">Now playing...</p>
@@ -91,7 +91,7 @@
         </div>
         <div class="">
           <button id="saved">
-            ${loveIcon(is_saved)}
+            ${loveIcon(data.is_saved)}
           </button>
         </div>
       </div>
@@ -122,7 +122,7 @@
     });
 
     saved.addEventListener("click", () => {
-      save(data.item.id, is_saved).then((res) => {
+      save(data.item.id, data.is_saved).then((res) => {
         console.log("save track:", res);
         if (res.data?.error) {
           alert(res.data?.error?.message);
@@ -179,7 +179,18 @@
       .then((res) => {
         console.log("current playing:", res);
         if (res.data) {
-          renderPlaying(res.data, res.is_saved);
+          try {
+            renderPlaying(res.data);
+          } catch (err) {
+            content.innerHTML = `
+             <div
+                class="flex p-3 border border-zinc-900 gap-3 rounded items-center justify-center"
+              >
+              <div>
+                <h3 class="font-medium">Someting Wrong</h3>
+              </div>
+            </div>`;
+          }
         } else {
           content.innerHTML = `
              <div
