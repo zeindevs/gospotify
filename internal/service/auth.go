@@ -49,7 +49,7 @@ func (as *AuthService) ClientLogin() (*types.ClientResponse, error) {
 	data.Set("client_id", as.cfg.CLIENT_ID)
 	data.Set("client_secret", as.cfg.CLIENT_SECRET)
 
-	as.http.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	as.http.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	res, status, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 
 	// if err := os.WriteFile("client.json", res, 0644); err != nil {
@@ -74,9 +74,12 @@ func (as *AuthService) Callback(code string, state string) (*types.AuthResponse,
 
 	token := base64.StdEncoding.EncodeToString([]byte(as.cfg.CLIENT_ID + ":" + as.cfg.CLIENT_SECRET))
 
-	as.http.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	as.http.Header.Add("Authorization", "Basic "+token)
+	as.http.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	as.http.Header.Set("Authorization", "Basic "+token)
 	res, status, err := as.http.Post("https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
+	if err != nil {
+		return nil, err
+	}
 
 	// if err := os.WriteFile("secret.json", res, 0644); err != nil {
 	// 	return nil, err

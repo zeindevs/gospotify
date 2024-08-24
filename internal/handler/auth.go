@@ -23,8 +23,8 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleClientLogin(w http.ResponseWriter, r *http.Request) {
 	res, err := h.AuthService.ClientLogin()
 	if err != nil {
-		WriteJSON(w, res.Status, types.ApiResponse{
-			Status: res.Status,
+		WriteJSON(w, http.StatusInternalServerError, types.ApiResponse{
+			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
 		return
@@ -40,18 +40,18 @@ func (h *Handler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	var code = r.URL.Query().Get("code")
 	var state = r.URL.Query().Get("state")
 
-	if state == "" {
+	if code == "" || state == "" {
 		WriteJSON(w, http.StatusBadRequest, types.ApiResponse{
 			Status: http.StatusBadRequest,
-			Error:  "state required",
+			Error:  "code or state required",
 		})
 		return
 	}
 
 	res, err := h.AuthService.Callback(code, state)
 	if err != nil {
-		WriteJSON(w, res.Status, types.ApiResponse{
-			Status: res.Status,
+		WriteJSON(w, http.StatusInternalServerError, types.ApiResponse{
+			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
 		return
@@ -83,8 +83,8 @@ func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.AuthService.RefreshToken(auth.RefreshToken)
 	if err != nil {
-		WriteJSON(w, res.Status, types.ApiResponse{
-			Status: res.Status,
+		WriteJSON(w, http.StatusInternalServerError, types.ApiResponse{
+			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
 		return

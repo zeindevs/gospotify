@@ -45,7 +45,6 @@ func (c *Http) Put(url string, data io.Reader) ([]byte, int, error) {
 
 func (c *Http) Delete(url string, data io.Reader) ([]byte, int, error) {
 	req, err := http.NewRequest("DELETE", url, data)
-	req.Header = c.Header
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
@@ -53,6 +52,7 @@ func (c *Http) Delete(url string, data io.Reader) ([]byte, int, error) {
 }
 
 func (c *Http) sendRequest(req *http.Request) ([]byte, int, error) {
+	req.Header = c.Header
 	res, err := c.http.Do(req)
 	if err != nil {
 		return nil, res.StatusCode, err

@@ -30,7 +30,7 @@ func (h *Handler) HandlePlaying(w http.ResponseWriter, r *http.Request) {
 	for _, sv := range res {
 		if sv {
 			data.IsSaved = sv
-			return
+			break
 		}
 	}
 
